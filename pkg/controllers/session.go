@@ -568,10 +568,10 @@ func (c *SessionController) reconcileService(ctx context.Context, session *v1alp
 								"direwolf/user": session.Spec.UserReference.Name,
 							}).
 						WithPorts(
-							v1ac.ServicePort().
-								WithName("wa"). // wolf-agent
-								WithPort(8443).
-								WithNodePort(8443),
+							//v1ac.ServicePort().
+							//	WithName("wa"). // wolf-agent
+							//	WithPort(8443).
+							//	WithNodePort(8443),
 							v1ac.ServicePort().
 								WithName("rtsp"). // moonlight-rtsp
 								WithPort(session.Status.Ports.RTSP).
