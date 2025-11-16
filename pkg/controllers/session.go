@@ -546,12 +546,6 @@ func (c *SessionController) reconcileService(ctx context.Context, session *v1alp
 		Apply(
 			context.Background(),
 			v1ac.Service(session.Status.ServiceName, session.Namespace).
-				WithAnnotations(map[string]string{
-					// Try to support popular service LoadBalancer implementation
-					// sharing key annotations.
-					"lbipam.cilium.io/sharing-key":        c.LBSharingKey,
-					"metallb.universe.tf/allow-shared-ip": c.LBSharingKey,
-				}).
 				WithLabels(
 					map[string]string{
 						"app":           "direwolf-worker",
@@ -567,7 +561,7 @@ func (c *SessionController) reconcileService(ctx context.Context, session *v1alp
 					WithController(true)).
 				WithSpec(
 					v1ac.ServiceSpec().
-						WithType(corev1.ServiceTypeLoadBalancer).
+						WithType(corev1.ServiceTypeNodePort).
 						WithSelector(
 							map[string]string{
 								"direwolf/app":  session.Spec.GameReference.Name,
@@ -576,22 +570,27 @@ func (c *SessionController) reconcileService(ctx context.Context, session *v1alp
 						WithPorts(
 							v1ac.ServicePort().
 								WithName("wa"). // wolf-agent
-								WithPort(8443),
+								WithPort(8443).
+								WithNodePort(8443),
 							v1ac.ServicePort().
 								WithName("rtsp"). // moonlight-rtsp
-								WithPort(session.Status.Ports.RTSP),
+								WithPort(session.Status.Ports.RTSP).
+								WithNodePort(session.Status.Ports.RTSP),
 							v1ac.ServicePort().
 								WithName("enet"). // moonlight-enet
 								WithProtocol(corev1.ProtocolUDP).
-								WithPort(session.Status.Ports.Control),
+								WithPort(session.Status.Ports.Control).
+								WithNodePort(session.Status.Ports.Control),
 							v1ac.ServicePort().
 								WithName("video"). // moonlight-video
 								WithProtocol(corev1.ProtocolUDP).
-								WithPort(session.Status.Ports.VideoRTP),
+								WithPort(session.Status.Ports.VideoRTP).
+								WithNodePort(session.Status.Ports.VideoRTP),
 							v1ac.ServicePort().
 								WithName("audio"). // moonlight-audio
 								WithProtocol(corev1.ProtocolUDP).
-								WithPort(session.Status.Ports.AudioRTP),
+								WithPort(session.Status.Ports.AudioRTP).
+								WithNodePort(session.Status.Ports.AudioRTP),
 						),
 				),
 			metav1.ApplyOptions{
