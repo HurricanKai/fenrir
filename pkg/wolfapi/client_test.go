@@ -11,7 +11,7 @@ import (
 	"games-on-whales.github.io/direwolf/pkg/wolfapi"
 )
 
-var testURL = "https://10.128.3.0:8443"
+var testURL = "https://10.128.3.0:38443"
 
 func TestSubscribe(t *testing.T) {
 	client := wolfapi.NewClient(testURL, &http.Client{

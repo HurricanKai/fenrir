@@ -568,10 +568,10 @@ func (c *SessionController) reconcileService(ctx context.Context, session *v1alp
 								"direwolf/user": session.Spec.UserReference.Name,
 							}).
 						WithPorts(
-							//v1ac.ServicePort().
-							//	WithName("wa"). // wolf-agent
-							//	WithPort(8443).
-							//	WithNodePort(8443),
+							v1ac.ServicePort().
+								WithName("wa"). // wolf-agent
+								WithPort(38443).
+								WithNodePort(38443),
 							v1ac.ServicePort().
 								WithName("rtsp"). // moonlight-rtsp
 								WithPort(session.Status.Ports.RTSP).
@@ -1004,12 +1004,12 @@ func (c *SessionController) reconcilePod(ctx context.Context, session *v1alpha1t
 			ImagePullPolicy: corev1.PullIfNotPresent,
 			Args: []string{
 				"--socket=/etc/wolf/wolf.sock",
-				"--port=8443",
+				"--port=38443",
 			},
 			Ports: []corev1.ContainerPort{
 				{
 					Name:          "wa",
-					ContainerPort: 8443,
+					ContainerPort: 38443,
 				},
 			},
 			Env: []corev1.EnvVar{
@@ -1058,7 +1058,7 @@ func (c *SessionController) reconcilePod(ctx context.Context, session *v1alpha1t
 				ProbeHandler: corev1.ProbeHandler{
 					HTTPGet: &corev1.HTTPGetAction{
 						Path:   "/readyz",
-						Port:   intstr.FromInt(8443),
+						Port:   intstr.FromInt(38443),
 						Scheme: corev1.URISchemeHTTPS,
 					},
 				},
@@ -1067,7 +1067,7 @@ func (c *SessionController) reconcilePod(ctx context.Context, session *v1alpha1t
 				ProbeHandler: corev1.ProbeHandler{
 					HTTPGet: &corev1.HTTPGetAction{
 						Path:   "/livez",
-						Port:   intstr.FromInt(8443),
+						Port:   intstr.FromInt(38443),
 						Scheme: corev1.URISchemeHTTPS,
 					},
 				},
@@ -1528,7 +1528,7 @@ func (c *SessionController) reconcileActiveStreams(
 	// Ensure they match each of our k8s sessions. Hash on AESKey/IV
 	// In the future it might make sense to just match on ClientID/ClientCertFingerprint
 	// but that is hardcoded for now :)
-	wolfclient := wolfapi.NewClient(fmt.Sprintf("https://%s:8443", service.Spec.ClusterIP), &http.Client{
+	wolfclient := wolfapi.NewClient(fmt.Sprintf("https://%s:38443", service.Spec.ClusterIP), &http.Client{
 		Transport: &http.Transport{
 			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 		},
